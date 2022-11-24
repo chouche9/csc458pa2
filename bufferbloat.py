@@ -81,6 +81,18 @@ class BBTopo(Topo):
         switch = self.addSwitch('s0')
 
         # TODO: Add links with appropriate characteristics
+        # Link from h1 to router has bandwidth of 1 Gbps
+        bw_link1 = args.bw_host
+        # Link from router to h2 has handwidth of 10 Mbps
+        bw_link2 = args.bw_net
+
+        # Extract the link delay and max queue size from parameters
+        link_delay = args.delay
+        link_maxq = args.maxq
+
+        # Construct the links between the two hosts and switch with corresponding characteristics
+        self.addLink(hosts[0], switch, bw=bw_link1, delay= '%sms' % link_delay, max_queue_size = link_maxq)
+        self.addLink(hosts[1], switch, bw=bw_link2, delay= '%sms' % link_delay, max_queue_size = link_maxq)
 
 # Simple wrappers around monitoring utilities.  You are welcome to
 # contribute neatly written (using classes) monitoring scripts for
@@ -111,6 +123,14 @@ def start_iperf(net):
     server = h2.popen("iperf -s -w 16m")
     # TODO: Start the iperf client on h1.  Ensure that you create a
     # long lived TCP flow. You may need to redirect iperf's stdout to avoid blocking.
+    h1 = net.get('h1')
+
+    # Extract the time to run the iperf client and the directory to save the output
+    time = args.time
+    directory = args.dir
+
+    # Execute the iperf program in a new process
+    h1.popen("iperf -c %s -t %s > %s/iperf.out" % (h2.IP(), time, directory), shell=True)
 
 def start_webserver(net):
     h1 = net.get('h1')
@@ -130,7 +150,22 @@ def start_ping(net):
     # until stdout is read. You can avoid this by runnning popen.communicate() or
     # redirecting stdout
     h1 = net.get('h1')
-    popen = h1.popen("echo '' > %s/ping.txt"%(args.dir), shell=True)
+    h2 = net.get('h2')
+
+    # Extract the directory to save the output
+    directory = args.dir
+
+    # Start a ping train from h1 to h2 by sending a packet every 0.1 second
+    h1.popen("ping -i 0.1 %s > %s/ping.txt" % (h2.IP(), directory), shell=True)
+
+def fetch_data(h1, h2):
+    fetch_durations = []
+    for i in range(3):
+        popen = h2.popen('curl -o /dev/null -s -w %{time_total} %s/http/index.html' % h1.IP())
+        fetch_time = popen.communicate()[0]
+        fetch_durations.append(float(fetch_time))
+    return fetch_durations
+    
 
 def bufferbloat():
     if not os.path.exists(args.dir):
@@ -159,12 +194,12 @@ def bufferbloat():
     # Depending on the order you add links to your network, this
     # number may be 1 or 2.  Ensure you use the correct number.
     #
-    # qmon = start_qmon(iface='s0-eth2',
-    #                  outfile='%s/q.txt' % (args.dir))
-    qmon = None
+    qmon = start_qmon(iface='s0-eth2',
+                     outfile='%s/q.txt' % (args.dir))
 
     # TODO: Start iperf, webservers, etc.
-    # start_iperf(net)
+    start_iperf(net)
+    start_webserver(net)
 
     # Hint: The command below invokes a CLI which you can use to
     # debug.  It allows you to run arbitrary commands inside your
@@ -189,9 +224,17 @@ def bufferbloat():
             break
         print "%.1fs left..." % (args.time - delta)
 
+        h1 = net.get('h1')
+        h2 = net.get('h2')
+        fetch_durations = fetch_data(h1, h2)
+        sleep(5)
+
     # TODO: compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
+    with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
+        f.write("fetching time average is :%lf\n" % (avg(fetch_durations)))
+        f.write("fetch time standard deviation is :%lf\n" % (stdev(fetch_durations)))
 
     stop_tcpprobe()
     if qmon is not None:
