@@ -21,6 +21,7 @@ import termcolor as T
 import sys
 import os
 import math
+import statistics
 
 # TODO: Don't just read the TODO sections in this code.  Remember that
 # one of the goals of this assignment is for you to learn how to use
@@ -233,8 +234,8 @@ def bufferbloat():
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
     with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
-        f.write("fetching time average is :%lf\n" % (avg(fetch_durations)))
-        f.write("fetch time standard deviation is :%lf\n" % (stdev(fetch_durations)))
+        f.write("fetching time average is :%lf\n" % (statistics.fmean(fetch_durations)))
+        f.write("fetching time standard deviation is :%lf\n" % (statistics.stdev(fetch_durations)))
 
     stop_tcpprobe()
     if qmon is not None:
