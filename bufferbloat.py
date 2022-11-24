@@ -234,7 +234,7 @@ def bufferbloat():
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
     with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
-        f.write("fetching time average is :%lf\n" % (mean(fetch_durations)))
+        f.write("fetching time average is :%lf\n" % (avg(fetch_durations)))
         f.write("fetching time standard deviation is :%lf\n" % (stdev(fetch_durations)))
 
     stop_tcpprobe()
