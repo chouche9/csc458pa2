@@ -233,9 +233,9 @@ def bufferbloat():
     # TODO: compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
-    with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
-        f.write("fetching time average is :%lf\n" % (statistics.fmean(fetch_durations)))
-        f.write("fetching time standard deviation is :%lf\n" % (statistics.stdev(fetch_durations)))
+    # with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
+    #     f.write("fetching time average is :%lf\n" % (statistics.fmean(fetch_durations)))
+    #     f.write("fetching time standard deviation is :%lf\n" % (statistics.stdev(fetch_durations)))
 
     stop_tcpprobe()
     if qmon is not None:
