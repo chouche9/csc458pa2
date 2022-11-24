@@ -227,7 +227,7 @@ def bufferbloat():
 
         h1 = net.get('h1')
         h2 = net.get('h2')
-        fetch_data(h1, h2)
+        fetch_data(h1, h2, fetch_durations)
         sleep(5)
 
     # TODO: compute average (and standard deviation) of the fetch
