@@ -161,7 +161,7 @@ def start_ping(net):
 def fetch_data(h1, h2):
     fetch_durations = []
     for i in range(3):
-        popen = h2.popen('curl -o /dev/null -s -w %{time_total} %s/http/index.html' % h1.IP())
+        popen = h2.popen('curl -o /dev/null -s -w %%{time_total} %s/http/index.html' % h1.IP())
         fetch_time = popen.communicate()[0]
         fetch_durations.append(float(fetch_time))
     return fetch_durations
