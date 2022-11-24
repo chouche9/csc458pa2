@@ -14,6 +14,7 @@ from subprocess import Popen, PIPE
 from time import sleep, time
 from multiprocessing import Process
 from argparse import ArgumentParser
+from helper import avg, stdev
 
 from monitor import monitor_qlen
 import termcolor as T
@@ -21,7 +22,6 @@ import termcolor as T
 import sys
 import os
 import math
-# import statistics
 
 # TODO: Don't just read the TODO sections in this code.  Remember that
 # one of the goals of this assignment is for you to learn how to use
@@ -159,13 +159,11 @@ def start_ping(net):
     # Start a ping train from h1 to h2 by sending a packet every 0.1 second
     h1.popen("ping -i 0.1 %s > %s/ping.txt" % (h2.IP(), directory), shell=True)
 
-def fetch_data(h1, h2):
-    fetch_durations = []
+def fetch_data(h1, h2, fetch_durations):
     for i in range(3):
         popen = h2.popen('curl -o /dev/null -s -w %%{time_total} %s/http/index.html' % h1.IP())
         fetch_time = popen.communicate()[0]
         fetch_durations.append(float(fetch_time))
-    return fetch_durations
     
 
 def bufferbloat():
@@ -216,6 +214,8 @@ def bufferbloat():
     # Hint: have a separate function to do this and you may find the
     # loop below useful.
     start_time = time()
+    fetch_durations = []
+
     while True:
         # do the measurement (say) 3 times.
         sleep(1)
@@ -227,15 +227,15 @@ def bufferbloat():
 
         h1 = net.get('h1')
         h2 = net.get('h2')
-        fetch_durations = fetch_data(h1, h2)
+        fetch_data(h1, h2)
         sleep(5)
 
     # TODO: compute average (and standard deviation) of the fetch
     # times.  You don't need to plot them.  Just note it in your
     # README and explain.
-    # with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
-    #     f.write("fetching time average is :%lf\n" % (statistics.fmean(fetch_durations)))
-    #     f.write("fetching time standard deviation is :%lf\n" % (statistics.stdev(fetch_durations)))
+    with open('%s/fetch_results.txt' % (args.dir), 'w') as f:
+        f.write("fetching time average is :%lf\n" % (mean(fetch_durations)))
+        f.write("fetching time standard deviation is :%lf\n" % (stdev(fetch_durations)))
 
     stop_tcpprobe()
     if qmon is not None:
