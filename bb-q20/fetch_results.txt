@@ -1,0 +1,2 @@
+fetching time average is :0.658462
+fetching time standard deviation is :0.355659
