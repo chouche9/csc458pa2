@@ -25,11 +25,12 @@ Assuming the queue is drained at 100Mbps, a packet might wait up to (1000 * 1500
 (ignore computation overheads in ping that might affect the final result).
 
 The RTT reported by ping is direclty proportional to the queue size. We described the relationship with the following equation: 
-RTT = m * queue_size where m is the rate in which RTT grows with each increase in the queue size.
+RTT = propagation_delay * queue_size
+If the propagation delay of the network remains constant, the RTT will grow in proportion with queue size.
 
 4. Identify and describe two ways to mitigate the bufferbloat problem.
 
-As seen from our experiment, we can mitigate the bufferbloat issue by lowering the buffer size to an reasonable amount. Smaller buffer
+As seen from our experiment, we can mitigate the bufferbloat issue by lowering the buffer size to a reasonable amount. Smaller buffer
 size will ensure that packets will be quickly dropped when the network is busy and resent when available rather than wait in the buffer
 for extended periods of time. We can also modify our router to detect when the buffer is being used significantly and notify the sender.
 Recall that the sender will continue to increase their congestion window size as long as the packets sent are not dropped and just 
